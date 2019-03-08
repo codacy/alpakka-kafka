@@ -13,7 +13,7 @@ class MoreSbtFixes extends SyntacticRule("MoreSbtFixes") {
       case commonSettings @ Defn.Val(_, _ @ List(Pat.Var(Term.Name("commonSettings"))), _, body) =>
         body.collect {
           case org @ Term.Name("organization") =>
-            Patch.replaceTree(org, """organization := "com.codacy", pgpPassphrase := Option(System.getenv("SONATYPE_GPG_PASSPHRASE")).map(_.toCharArray), //""")
+            Patch.replaceTree(org, """organization := "com.codacy", resolvers ~= { _.filterNot(_.name.toLowerCase.contains("codacy")) }, pgpPassphrase := Option(System.getenv("SONATYPE_GPG_PASSPHRASE")).map(_.toCharArray), //""")
         }
     }.flatten.asPatch
   }
