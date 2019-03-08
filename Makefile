@@ -8,7 +8,6 @@ build: ## prepare the environment and cross-compile
 	mkdir -p bin
 	wget -nc -O bin/coursier https://git.io/coursier-cli && chmod +x bin/coursier
 	bin/coursier bootstrap -J "-Xss100m" ch.epfl.scala:scalafix-cli_2.12.8:0.9.4 -f --main scalafix.cli.Cli -o bin/scalafix
-	# TODO: fix the branch from env vars or something
 	git clone --branch v$(ALPAKKA_KAFKA_VERSION) https://github.com/akka/alpakka-kafka.git
 	git clone --branch  v$(AKKA_VERSION) --depth 1 https://github.com/akka/akka
 	mkdir -p alpakka-kafka/core/src/main/scala/akka/util
@@ -40,6 +39,3 @@ help:
 	@echo "\n"
 	@grep -E '^[a-zA-Z_/%\-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 	@echo "\n"
-
-
-curl -Lo bin/coursier https://git.io/coursier-cli && chmod +x bin/coursier
