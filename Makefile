@@ -26,7 +26,7 @@ build: ## prepare the environment and cross-compile
 	bin/scalafix -r "file://$(PWD)/CleanAkkaStreamOps.scala" --files alpakka-kafka/core/src/main/scala/akka/stream/impl/fusing/GroupedWeightedWithin.scala
 	bin/scalafix -r "file://$(PWD)/MoreSbtFixes.scala" --files alpakka-kafka/build.sbt
 	bin/scalafix -r "file://$(PWD)/RemoveScalafmt.scala" --files alpakka-kafka/project/plugins.sbt
-	(cd alpakka-kafka && sbt ";retrieveGPGKeys ;++2.11.12 ;set ThisBuild / version := \"$(ALPAKKA_KAFKA_VERSION)\"; core/compile; core/publishSigned; sonatypeRelease")
+	(cd alpakka-kafka && sbt ";retrieveGPGKeys ;++2.11.12 ; set ThisBuild / isSnapshot := false; set ThisBuild / version := \"$(ALPAKKA_KAFKA_VERSION)\"; core/compile; core/publishSigned; sonatypeRelease")
 
 .PHONY: clean
 clean: ## clean target directories
