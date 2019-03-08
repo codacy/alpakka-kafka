@@ -30,7 +30,7 @@ references:
 
   save_sbt_cache: &save_sbt_cache
     save_cache:
-      key: sbt-cache-{{ .Branch }}-{{ checksum "build.sbt" }}-{{ .Environment.CIRCLE_SHA1 }}
+      key: sbt-cache-{{ .Branch }}-{{ checksum "alpakka-kafka/build.sbt" }}-{{ .Environment.CIRCLE_SHA1 }}
       paths:
         - "~/.ivy2/cache"
         - "~/.sbt"
