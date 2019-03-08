@@ -1,0 +1,82 @@
+# CircleCI 2.0 configuration file
+version: 2
+
+# Re-usable blocks to reduce boilerplate in job definitions.
+references:
+
+  sbt_jvm_defaults: &sbt_jvm_defaults
+    JAVA_OPTS: -Xmx3200m
+
+  default_sbt_job: &default_sbt_job
+    machine: true
+    working_directory: ~/workdir
+    environment:
+      <<: *sbt_jvm_defaults
+
+  restore_sbt_cache: &restore_sbt_cache
+    restore_cache:
+      keys:
+        - sbt-cache-{{ .Branch }}-{{ checksum "alpakka-kafka/build.sbt" }}-{{ .Environment.CIRCLE_SHA1 }}
+        - sbt-cache-{{ .Branch }}-{{ checksum "alpakka-kafka/build.sbt" }}
+        - sbt-cache-{{ .Branch }}
+        - sbt-cache
+
+  clean_sbt_cache: &clean_sbt_cache
+    run:
+      name: CleanCache
+      command: |
+        find $HOME/.sbt -name "*.lock" | xargs rm | true
+        find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm | true
+
+  save_sbt_cache: &save_sbt_cache
+    save_cache:
+      key: sbt-cache-{{ .Branch }}-{{ checksum "build.sbt" }}-{{ .Environment.CIRCLE_SHA1 }}
+      paths:
+        - "~/.ivy2/cache"
+        - "~/.sbt"
+        - "~/.m2"
+
+jobs:
+
+  checkout_and_version:
+    docker:
+      - image: codacy/git-version:latest
+    working_directory: ~/workdir
+    steps:
+      - checkout
+      - run:
+          name: Set version
+          command: /bin/git-version > .version
+      - run:
+          name: Set Sbt version
+          command: echo "version in ThisBuild := \"$(cat .version)\"" > version.sbt
+      - run:
+          name: Current version
+          command: cat .version
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - workdir/*
+
+  build_and_publish:
+    <<: *default_sbt_job
+    steps:
+      - checkout
+      - *restore_sbt_cache
+      - run:
+          name: Checkout, Fix, Build and Publish
+          command: make build
+      - *clean_sbt_cache
+      - *save_sbt_cache
+
+workflows:
+  version: 2
+
+  publish:
+    jobs:
+    - build_and_publish:
+        filters:
+          branches:
+            only:
+            - master
+        context: CodacyAWS
